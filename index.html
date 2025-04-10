@@ -26,9 +26,10 @@
       "esri/layers/FeatureLayer",
 
       //adding editor widget
-      "esri/widgets/Editor"
+      "esri/widgets/Editor",
+      "esri/widgets/Legend"
 
-    ], function (esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor) {
+    ], function (esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Editor, Legend) {
 
       esriConfig.apiKey = "AAPK2cb19acc98eb406b80346e85af5aa1ffagWp07_WJVQlFAY2XL6xGrQ86USz9K6UzB1OaBd37PTIlYdHTo04S0-F9ETbr-dC";
       const map = new Map({
@@ -152,14 +153,54 @@
         //adding the feature layer to the map
         map.add(airportLayer);
 
-        //adding the const for the feature layer
+        // Adding a renderer with an icon for the myAirports layer
+        const myAirportsRenderer = {
+          type: "simple",
+          symbol: {
+            type: "picture-marker",
+            url: "https://sounny.github.io/agol/outline_local_airport_black_24dp.png", // Icon URL
+            width: "18px",
+            height: "18px"
+          }
+        };
+
+        // Adding labels to display the airport code
+        const myAirportsLabels = {
+          symbol: {
+            type: "text", // Text symbol
+            color: "#000000", // Black text
+            haloColor: "#FFFFFF", // White halo
+            haloSize: "1px",
+            font: {
+              size: "12px",
+              family: "Arial",
+              weight: "bold"
+            }
+          },
+          labelPlacement: "above-center", // Position of the label
+          labelExpressionInfo: {
+            expression: "$feature.AirportCode" // Field to display
+          }
+        };
+
+        // Adding the const for the feature layer
         const myAirports = new FeatureLayer({
-        url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/My_Airports_jw25/FeatureServer",
-        
+          url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/My_Airports_jw25/FeatureServer",
+
+          // Adding the renderer for the icon
+          renderer: myAirportsRenderer,
+
+          // Adding the labels
+          labelingInfo: [myAirportsLabels],
+
         //adding the popup here
         outFields: ["AirportCode"],
 
+        
+
         });
+
+        
 
         //adding the feature layer to the map
         map.add(myAirports);
@@ -177,6 +218,28 @@
 
         // Add the widget to the view
         view.ui.add(editor, "top-right");
+
+            // Create the Legend widget
+    const legend = new Legend({
+      view: view, // Reference to the MapView
+      layerInfos: [
+        {
+          layer: myAirports,
+          title: "My Airports"
+        },
+        {
+          layer: airportLayer,
+          title: "US Airports"
+        },
+        {
+          layer: usaeduLayer,
+          title: "Colleges and Universities"
+        }
+      ]
+    });
+
+    // Add the Legend widget to the bottom-left corner of the view
+    view.ui.add(legend, "bottom-left");
 
     });
   </script>
